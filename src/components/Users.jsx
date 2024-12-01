@@ -17,59 +17,71 @@ export default function Users() {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Swal.fire({
-        //   title: "Deleted!",
-        //   text: "Your file has been deleted.",
-        //   icon: "success",
-        // });
         fetch(`http://localhost:5000/users/${id}`, {
           method: "DELETE",
         })
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
+            if (data.deletedCount) {
+              Swal.fire({
+                title: "Deleted!",
+                text: "The user has been deleted.",
+                icon: "success",
+              });
+              // Update local state
+              const updatedUsers = users.filter((user) => user.id !== id);
+              setUsers(updatedUsers);
+            }
+          })
+          .catch((error) => {
+            Swal.fire({
+              title: "Error!",
+              text: "Something went wrong while deleting the user.",
+              icon: "error",
+            });
           });
       }
     });
   };
+
   return (
     <div>
       <h2 className="text-2xl">Users: {users.length}</h2>
-      <div>
-        <div className="overflow-x-auto">
-          <table className="table">
-            {/* head */}
-            <thead>
-              <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Created At</th>
-                <th>Action</th>
+      <div className="overflow-x-auto">
+        <table className="table">
+          {/* Table Header */}
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Table Rows */}
+            {users.map((user, index) => (
+              <tr key={user.id}>
+                {" "}
+                {/* Add a unique key */}
+                <th>{index + 1}</th> {/* Display row number */}
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.createdAt}</td>
+                <td>
+                  <button className="btn btn-accent">Edit</button>
+                  <button
+                    onClick={() => handleUserDelete(user.id)} // Pass `id` to the function
+                    className="btn btn-primary"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {/* row 1 */}
-              {users.map((user) => (
-                <tr>
-                  <th>1</th>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.createdAt}</td>
-                  <td>
-                    <button className="btn btn-accent">e</button>
-                    <button
-                      onClick={handleUserDelete}
-                      className="btn btn-primary"
-                    >
-                      x
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
